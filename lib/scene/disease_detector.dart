@@ -1,4 +1,9 @@
+import 'dart:typed_data';
+
+import 'package:disease_detect/constants/disease_description.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logger/logger.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
@@ -15,23 +20,34 @@ class DiseaseDetector extends StatefulWidget {
 class _DiseaseDetectorState extends State<DiseaseDetector> {
   final imagePicker = ImagePicker();
   var logger = Logger(printer: PrettyPrinter());
+  ImageSource galleryAsSource = ImageSource.gallery;
+  ImageSource cameraAsSource = ImageSource.camera;
   String? diseaseName;
-  Future<void> detectImage() async {
-    XFile? image = await imagePicker.pickImage(source: ImageSource.gallery);
+  Uint8List imageBytes = Uint8List(0);
+  bool isInitialStage = true;
+
+  Future<void> detectImage(ImageSource sourceOfImage) async {
+    setState(() {
+      imageBytes = Uint8List(0);
+      isInitialStage = false;
+      diseaseName = null;
+    });
+    XFile? image = await imagePicker.pickImage(source: sourceOfImage);
     final interpreter = await Interpreter.fromAsset("assets/model.tflite");
     final inputShape = interpreter.getInputTensor(0).shape;
-    logger.d('Input shape: $inputShape');
+    // logger.d('Input shape: $inputShape');
     final outputShape = interpreter.getOutputTensor(0).shape;
-    logger.d('Output shape: $outputShape');
-    logger.d(interpreter.getInputTensors());
-    logger.d(interpreter.getOutputTensors());
+    // logger.d('Output shape: $outputShape');
+    // logger.d(interpreter.getInputTensors());
+    // logger.d(interpreter.getOutputTensors());
     if (image != null) {
       final bytes = await image.readAsBytes();
       final img.Image? decodedImage = img.decodeImage(bytes);
       if (decodedImage == null) {
-        logger.e("Image decoding failed");
+        // logger.e("Image decoding failed");
         return;
       }
+
       // Resize image resolution equal to 640x640
       final img.Image resizedImage = img.copyResize(
         decodedImage,
@@ -39,6 +55,10 @@ class _DiseaseDetectorState extends State<DiseaseDetector> {
         height: 640,
         interpolation: img.Interpolation.cubic,
       );
+
+      setState(() {
+        imageBytes = Uint8List.fromList(img.encodePng(resizedImage));
+      });
       // Convert image to Float32List (1, 640, 640, 3), the model's accepted shape....
       final inputTensor = List.generate(
         1,
@@ -102,26 +122,213 @@ class _DiseaseDetectorState extends State<DiseaseDetector> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: CustomScrollView(
-          slivers: [
-            SliverAppBar(title: Text("Detect Disease")),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.all(20),
-                child: IconButton(
-                  onPressed: detectImage,
-                  icon: Icon(Icons.upload_file),
+        appBar: AppBar(
+          title: SizedBox(height: 0,),
+          backgroundColor: Colors.blueAccent,
+          toolbarHeight: 0,
+        ),
+        body: SafeArea(
+          child: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                pinned: true,
+                toolbarHeight: 80,
+                backgroundColor: Colors.blueAccent,
+                title: Text(
+                  "Detect Disease",
+                  style: TextStyle(
+                    fontFamily: GoogleFonts.poppins().fontFamily,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 30,
+                    color: Colors.white,
+                  ),
+                ),
+                scrolledUnderElevation: 0.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(20),
+                  ),
+                  side: BorderSide(
+                    width: 0,
+                    color: Colors.white,
+                    style: BorderStyle.solid,
+                  ),
+                ),
+                actions: [
+                  Padding(
+                    padding: EdgeInsets.all(5),
+                    child: IconButton(
+                      onPressed: () {
+                        context.push("/settings");
+                      },
+                      icon: Icon(Icons.settings, color: Colors.white, size: 30),
+                    ),
+                  ),
+                ],
+              ),
+              SliverToBoxAdapter(child: SizedBox(height: 50)),
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    imageBytes.isNotEmpty
+                        ? Container(
+                          padding: EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: Image.memory(
+                            imageBytes,
+                            width: 250,
+                            height: 250,
+                          ),
+                        )
+                        : Center(
+                          child:
+                              !isInitialStage
+                                  ? CircularProgressIndicator(
+                                    color: Colors.blueAccent,
+                                  )
+                                  : Text(
+                                    "Select or Capture an image!",
+                                    style: TextStyle(
+                                      fontFamily:
+                                          GoogleFonts.poppins().fontFamily,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                      color:Colors.blueAccent
+                                    ),
+                                  ),
+                        ),
+                    Center(
+                      child: Text(
+                        diseaseName != null
+                            ? diseaseName.toString().toUpperCase()
+                            : isInitialStage
+                            ? "No image is provided!"
+                            : "Loading....",
+                        style: TextStyle(
+                          fontFamily: GoogleFonts.poppins().fontFamily,
+                          fontWeight: FontWeight.bold,
+                          fontSize: diseaseName != null ? 30 : 20,
+                          color: diseaseName != null ? Colors.black : Colors.blueAccent,
+                        ),
+                      ),
+                    ),
+                    diseaseName == null
+                        ? const SizedBox(height: 0)
+                        : Builder(
+                      builder: (context) {
+                        final disease = diseaseDescription.firstWhere(
+                              (d) => d["disease_name"] == diseaseName,
+                          orElse: () => {},
+                        );
+
+                        if (disease.isEmpty) return const SizedBox(height: 0);
+
+                        return Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                diseaseName!.replaceAll('_', ' ').toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: GoogleFonts.poppins().fontFamily,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                "About:",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: GoogleFonts.poppins().fontFamily,
+                                ),
+                              ),
+                              Text(
+                                disease["disease_description"] ?? "No description available",
+                                style: TextStyle(fontFamily: GoogleFonts.poppins().fontFamily),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                "Symptoms:",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: GoogleFonts.poppins().fontFamily,
+                                ),
+                              ),
+                              Text(
+                                disease["disease_symptoms"] ?? "No symptoms available",
+                                style: TextStyle(fontFamily: GoogleFonts.poppins().fontFamily),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                "Management:",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: GoogleFonts.poppins().fontFamily,
+                                ),
+                              ),
+                              if (disease["management"] != null && (disease["management"] as List).isNotEmpty)
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: (disease["management"] as List)
+                                      .map((m) => Text(
+                                    "• $m",
+                                    style: TextStyle(fontFamily: GoogleFonts.poppins().fontFamily),
+                                  ))
+                                      .toList(),
+                                )
+                              else
+                                Text(
+                                  "Management details will be added soon",
+                                  style: TextStyle(fontFamily: GoogleFonts.poppins().fontFamily),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+
+                  ],
                 ),
               ),
+            ],
+          ),
+        ),
+        bottomNavigationBar: Container(
+          padding: EdgeInsets.all(15),
+          margin: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.blueAccent,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              width: 0.5,
+              color: Colors.indigo,
+              style: BorderStyle.solid,
             ),
-            SliverToBoxAdapter(
-              child: Text(
-                diseaseName != null
-                    ? diseaseName.toString()
-                    : "Disease is not detected!",
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                onPressed: () async => detectImage(galleryAsSource),
+                icon: Icon(Icons.cloud_upload, color: Colors.white, size: 35),
               ),
-            ),
-          ],
+              IconButton(
+                onPressed: () async => detectImage(cameraAsSource),
+                icon: Icon(
+                  Icons.camera_alt_outlined,
+                  color: Colors.white,
+                  size: 35,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
