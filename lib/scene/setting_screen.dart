@@ -36,46 +36,56 @@ class _SettingScreenState extends State<SettingScreen> {
         slivers: [
           SliverToBoxAdapter(child: SizedBox(height: 10)),
           SliverToBoxAdapter(
-            child: Text(
-              "Developer",
-              style: TextStyle(
-                fontFamily: GoogleFonts.poppins().fontFamily,
-                fontWeight: FontWeight.bold,
-                fontSize: 35,
-              ),
-            ),
-          ),
-
-          SliverToBoxAdapter(child: Divider(color: Colors.black12, height: 10)),
-          SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.all(10),
+              padding: EdgeInsets.all(20),
               child: Text(
-                "Tanmay Maitra Tanu",
+                "Developer",
                 style: TextStyle(
                   fontFamily: GoogleFonts.poppins().fontFamily,
                   fontWeight: FontWeight.bold,
-                  fontSize: 25,
+                  fontSize: 35,
                 ),
               ),
             ),
           ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "AhmedTrooper",
+                    style: TextStyle(
+                      fontFamily: GoogleFonts.poppins().fontFamily,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 25,
+                    ),
+                  ),
+
+                ],
+              ),
+            ),
+          ),
           SliverToBoxAdapter(child: Divider(color: Colors.black12, height: 10)),
           SliverToBoxAdapter(
-            child: Text(
-              "About us",
-              style: TextStyle(
-                fontFamily: GoogleFonts.poppins().fontFamily,
-                fontWeight: FontWeight.bold,
-                fontSize: 35,
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Text(
+                "About",
+                style: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 35,
+                ),
               ),
             ),
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.all(10),
+              padding: EdgeInsets.all(20),
               child: Text(
-                "A passionate full stack web developer from Bangladesh",
+                "This  application can detect tea leaf diseases...",
                 style: TextStyle(
                   fontFamily: GoogleFonts.poppins().fontFamily,
                   fontWeight: FontWeight.bold,
@@ -86,18 +96,21 @@ class _SettingScreenState extends State<SettingScreen> {
           ),
           SliverToBoxAdapter(child: Divider(color: Colors.black12, height: 10)),
           SliverToBoxAdapter(
-            child: Text(
-              "Contact",
-              style: TextStyle(
-                fontFamily: GoogleFonts.poppins().fontFamily,
-                fontWeight: FontWeight.bold,
-                fontSize: 35,
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Text(
+                "Contact",
+                style: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 35,
+                ),
               ),
             ),
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.all(10),
+              padding: EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -106,28 +119,37 @@ class _SettingScreenState extends State<SettingScreen> {
                       Icon(Icons.email, color: Colors.blueAccent, size: 30),
                       SizedBox(width: 10),
                       Text(
-                        "tanmoy2753@gmail.com",
+                        "suahmedramjan1@gmail.com",
                         style: TextStyle(
                           fontFamily: GoogleFonts.poppins().fontFamily,
-                          fontWeight: FontWeight.bold,))
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                   Row(
                     children: [
-                      Icon(LucideIcons.github, color: Colors.blueAccent, size: 30),
+                      Icon(
+                        LucideIcons.github,
+                        color: Colors.blueAccent,
+                        size: 30,
+                      ),
                       SizedBox(width: 10),
                       Text(
-                          "https://github.com/tanmaytanu",
-                          style: TextStyle(
-                            fontFamily: GoogleFonts.poppins().fontFamily,
-                            fontWeight: FontWeight.bold,))
+                        "https://github.com/AhmedTrooper",
+                        style: TextStyle(
+                          fontFamily: GoogleFonts.poppins().fontFamily,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
-                  )
+                  ),
                 ],
-              )
+              ),
             ),
           ),
-          SliverToBoxAdapter(child: Divider(color: Colors.black12, height: 10)),
+          SliverToBoxAdapter(child: SizedBox(height: 20)),
+
         ],
       ),
     );
