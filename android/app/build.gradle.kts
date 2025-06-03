@@ -8,8 +8,8 @@ android {
     namespace = "com.example.tflite_inference"
     compileSdk = flutter.compileSdkVersion
 //    ndkVersion = flutter.ndkVersion
-    ndkVersion = "27.0.12077973"
-
+//    ndkVersion = "27.0.12077973"
+ndkVersion = "29.0.13113456"
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
