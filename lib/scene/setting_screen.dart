@@ -59,9 +59,10 @@ class _SettingScreenState extends State<SettingScreen> {
                     style: TextStyle(
                       fontFamily: GoogleFonts.poppins().fontFamily,
                       fontWeight: FontWeight.bold,
-                      fontSize: 25,
+                      fontSize: 30,
                     ),
                   ),
+
 
                 ],
               ),
@@ -85,66 +86,12 @@ class _SettingScreenState extends State<SettingScreen> {
             child: Padding(
               padding: EdgeInsets.all(20),
               child: Text(
-                "This  application can detect tea leaf diseases...",
+                "This  application can detect tea leaf disease using image captured by camera or picked from storage...",
                 style: TextStyle(
                   fontFamily: GoogleFonts.poppins().fontFamily,
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                 ),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(child: Divider(color: Colors.black12, height: 10)),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Text(
-                "Contact",
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 35,
-                ),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.email, color: Colors.blueAccent, size: 30),
-                      SizedBox(width: 10),
-                      Text(
-                        "suahmedramjan1@gmail.com",
-                        style: TextStyle(
-                          fontFamily: GoogleFonts.poppins().fontFamily,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Icon(
-                        LucideIcons.github,
-                        color: Colors.blueAccent,
-                        size: 30,
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        "https://github.com/AhmedTrooper",
-                        style: TextStyle(
-                          fontFamily: GoogleFonts.poppins().fontFamily,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
               ),
             ),
           ),

@@ -28,6 +28,9 @@ class _DiseaseDetectorState extends State<DiseaseDetector> {
   Uint8List imageBytes = Uint8List(0);
   bool isInitialStage = true;
   String? selectedName;
+  int? inferenceTime;
+  int? fullProcessTime;
+
 
 
   void handleSave() async {
@@ -82,6 +85,7 @@ class _DiseaseDetectorState extends State<DiseaseDetector> {
       diseaseName = null;
       selectedName = null;
     });
+    Stopwatch fullTimeWatcher = Stopwatch()..start();
     XFile? image = await imagePicker.pickImage(source: sourceOfImage);
     final interpreter = await Interpreter.fromAsset("assets/keras.tflite");
     final inputShape = interpreter.getInputTensor(0).shape;
@@ -127,7 +131,10 @@ class _DiseaseDetectorState extends State<DiseaseDetector> {
         1,
         (_) => List.filled(8, 0.0),
       );
+
+      Stopwatch inferenceWatcher = Stopwatch()..start();
       interpreter.run(inputTensor, outputBuffer);
+      inferenceWatcher.stop();
 
       List<double> predictions = outputBuffer[0];
       double maxValue = predictions.reduce((a, b) => a > b ? a : b);
@@ -145,8 +152,11 @@ class _DiseaseDetectorState extends State<DiseaseDetector> {
         'white_spot',
       ];
       String predictedClass = classNames[classIndex];
+      fullTimeWatcher.stop();
       setState(() {
         diseaseName = predictedClass;
+        inferenceTime = inferenceWatcher.elapsedMilliseconds;
+        fullProcessTime = fullTimeWatcher.elapsedMilliseconds;
       });
     }
   }
@@ -243,7 +253,7 @@ class _DiseaseDetectorState extends State<DiseaseDetector> {
                             ? diseaseName.toString().toUpperCase()
                             : isInitialStage
                             ? "No image is provided!"
-                            : "Loading....",
+                            : "",
                         style: TextStyle(
                           fontFamily: GoogleFonts.poppins().fontFamily,
                           fontWeight: FontWeight.bold,
@@ -273,6 +283,25 @@ class _DiseaseDetectorState extends State<DiseaseDetector> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+
+                                  const SizedBox(height: 10),
+                                  inferenceTime == null ? const SizedBox(height: 0,width: 0,) : Center(
+                                    child: Text(
+                                        "Inference time : $inferenceTime (ms)",
+                                      style : TextStyle(
+                                          fontWeight: FontWeight.bold
+                                      ),
+                                    ),
+                                  ),
+                                  fullProcessTime == null ? const SizedBox(height: 0,width: 0,) : Center(
+                                    child: Text(
+                                        "Full Process time : $fullProcessTime (ms)",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
                                   Text(
                                     diseaseName!
                                         .replaceAll('_', ' ')
@@ -281,10 +310,11 @@ class _DiseaseDetectorState extends State<DiseaseDetector> {
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
                                       fontFamily:
-                                          GoogleFonts.poppins().fontFamily,
+                                      GoogleFonts.poppins().fontFamily,
                                     ),
                                   ),
                                   const SizedBox(height: 10),
+
                                   Text(
                                     "About:",
                                     style: TextStyle(
@@ -363,10 +393,10 @@ class _DiseaseDetectorState extends State<DiseaseDetector> {
                                   // Dropdown for name selection
                                   Center(
                                     child: DropdownButton<String>(
-                                      hint: const Text("Select a name"),
+                                      hint: const Text("Select teacher's name"),
                                       value: selectedName,
                                       items:
-                                      ['Ahmed', 'Raisul', 'Usama'].map((
+                                      ['Promit', 'Dibbya', 'Yousuf'].map((
                                           String value,
                                           ) {
                                         return DropdownMenuItem<String>(
@@ -393,7 +423,7 @@ class _DiseaseDetectorState extends State<DiseaseDetector> {
                                       child: Padding(
                                         padding: const EdgeInsets.only(top: 10),
                                         child: Text(
-                                          "Tested by: Dr. $selectedName",
+                                          "Send to : Dr. $selectedName",
                                           style: TextStyle(
                                             fontFamily:
                                             GoogleFonts.poppins().fontFamily,
