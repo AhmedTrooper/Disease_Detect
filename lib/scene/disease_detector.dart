@@ -1,18 +1,18 @@
-import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:disease_detect/constants/disease_description.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logger/logger.dart';
+import 'package:saver_gallery/saver_gallery.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
-import 'package:permission_handler/permission_handler.dart';
 
 class DiseaseDetector extends StatefulWidget {
-  const DiseaseDetector({super.key});
+
+   const DiseaseDetector({super.key});
+
   @override
   State<StatefulWidget> createState() {
     return _DiseaseDetectorState();
@@ -31,52 +31,47 @@ class _DiseaseDetectorState extends State<DiseaseDetector> {
   int? inferenceTime;
   int? fullProcessTime;
 
+  late Interpreter interpreter;
+
+@override
+  void initState() {
+    super.initState();
+    setInterpreter().then((itp) {
+      setState(() {
+        interpreter = itp;
+      });
+    });
+  }
+
+  Future<Interpreter> setInterpreter() async {
+    try {
+      final interpreter = await Interpreter.fromAsset("assets/keras.tflite");
+      logger.i("Interpreter loaded successfully.");
+      return interpreter;
+    } catch (e) {
+      logger.e("Failed to load interpreter: $e");
+      rethrow;
+    }
+  }
+
+
 
 
   void handleSave() async {
-
-
-    logger.f("Function is called!");
-
-    if (imageBytes.isEmpty) {
-      logger.f("No image");
-      return;
-    }
-
-    // Request storage permission
-    var status = await Permission.storage.request();
-    if (!status.isGranted) {
-      logger.f("Denied");
-      if(mounted){
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Storage permission denied."),
-          ),
-        );
-      }
-      return;
-    }
-
-    // Get downloads directory path
-    final directory = Directory(
-      '/storage/emulated/0/Download',
-    );
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final filePath =
-        '${directory.path}/disease_image${diseaseName}_$timestamp.png';
-
-    final file = File(filePath);
-    await file.writeAsBytes(imageBytes);
-
-
-    if(mounted){
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Image saved to Downloads!")),
-      );
-    }
-
-
+try{
+  logger.f("Started");
+  final timestamp = DateTime.now().millisecondsSinceEpoch;
+  SaverGallery.saveImage(imageBytes,
+      fileName: "$diseaseName $timestamp",
+      androidRelativePath: "Pictures/$diseaseName",
+      skipIfExists: true);
+  logger.f("Saved");
+} catch(e){
+  logger.f("Failed...");
+  logger.f(e);
+}
   }
+
 
   Future<void> detectImage(ImageSource sourceOfImage) async {
     setState(() {
@@ -87,7 +82,7 @@ class _DiseaseDetectorState extends State<DiseaseDetector> {
     });
     Stopwatch fullTimeWatcher = Stopwatch()..start();
     XFile? image = await imagePicker.pickImage(source: sourceOfImage);
-    final interpreter = await Interpreter.fromAsset("assets/keras.tflite");
+
     final inputShape = interpreter.getInputTensor(0).shape;
     logger.d('Input shape: $inputShape');
     final outputShape = interpreter.getOutputTensor(0).shape;
@@ -393,7 +388,7 @@ class _DiseaseDetectorState extends State<DiseaseDetector> {
                                   // Dropdown for name selection
                                   Center(
                                     child: DropdownButton<String>(
-                                      hint: const Text("Select teacher's name"),
+                                      hint: const Text("Select officer's name"),
                                       value: selectedName,
                                       items:
                                       ['Promit', 'Dibbya', 'Yousuf'].map((
@@ -423,7 +418,7 @@ class _DiseaseDetectorState extends State<DiseaseDetector> {
                                       child: Padding(
                                         padding: const EdgeInsets.only(top: 10),
                                         child: Text(
-                                          "Send to : Dr. $selectedName",
+                                          "Send to : Dr. $selectedName sir",
                                           style: TextStyle(
                                             fontFamily:
                                             GoogleFonts.poppins().fontFamily,
@@ -450,7 +445,7 @@ class _DiseaseDetectorState extends State<DiseaseDetector> {
                         Colors.blueAccent,
                       ),
                     ),
-                    onPressed: handleSave,
+                    onPressed:  handleSave,
                     child: Padding(
                       padding: EdgeInsets.all(10),
                       child: Text(

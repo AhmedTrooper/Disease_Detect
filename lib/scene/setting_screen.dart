@@ -61,9 +61,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       fontWeight: FontWeight.bold,
                       fontSize: 30,
                     ),
-                  ),
-
-
+                  )
                 ],
               ),
             ),

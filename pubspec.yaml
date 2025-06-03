@@ -41,8 +41,7 @@ dependencies:
   google_fonts: ^6.2.1
   go_router: ^14.8.1
   lucide_icons: ^0.257.0
-  path_provider: ^2.1.5
-  permission_handler: ^12.0.0+1
+  saver_gallery: ^4.0.1
 
 dev_dependencies:
   flutter_test:
